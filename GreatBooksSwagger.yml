@@ -1,0 +1,323 @@
+openapi: 3.0.4
+info:
+  title: KATA - ANALYST -  Online Bookstore (JR) - Sam Rotthier
+  description: |-
+    This is a Swagger for an online bookstore named GreatBooks.com.
+    You will find api's for searching books, retrieving details and placing orders.
+  contact:
+    name: Sam Rotthier
+    email: sam.rotthier@hotmail.com
+  version: v1.0
+servers:
+  - url: https://GreatBooks.com/api/v1
+paths:
+  /books:
+    get:
+      tags:
+        - book
+      summary: Retrieve a list of books
+      description: Retrieve a list of books from webstore GreatBooks.com
+      operationId: getListOfBooks
+      parameters:
+        - $ref: '#/components/parameters/title'
+        - $ref: '#/components/parameters/category'
+        - $ref: '#/components/parameters/price'
+        - $ref: '#/components/parameters/author'
+      responses:
+        '200':
+          $ref: '#/components/responses/BookListRetrievalResponse'
+        '400':
+          $ref: '#/components/responses/400Response'
+        '401':
+          $ref: '#/components/responses/401Response'
+        '403':
+          $ref: '#/components/responses/403Response'
+        '404':
+          $ref: '#/components/responses/404Response'        
+        '500':
+          $ref: '#/components/responses/500Response'
+  /books/{isbnCode}:
+    get:
+      tags:
+        - book
+      summary: Retrieve a book
+      description: Retrieve a book based on ISBN code
+      operationId: getBookByISBNCode
+      parameters:
+        - $ref: '#/components/parameters/isbnCode'
+      responses:
+        '200':
+          $ref: '#/components/responses/BookRetrievalResponse'
+        '400':
+          $ref: '#/components/responses/400Response'
+        '401':
+          $ref: '#/components/responses/401Response'
+        '403':
+          $ref: '#/components/responses/403Response'
+        '404':
+          $ref: '#/components/responses/404Response'        
+        '500':
+          $ref: '#/components/responses/500Response'
+  /orders:
+     post:
+       tags:
+         - order
+       summary: Create a new order
+       description: Create a new order on the webstore GreatBooks.com
+       operationId: createOrder
+       requestBody:
+         description: Create a new order
+         required: true
+         content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/Order'
+       responses:
+         '200':
+           $ref: '#/components/responses/OrderCreationResponse'
+         '400':
+           $ref: '#/components/responses/400Response'
+         '401':
+           $ref: '#/components/responses/401Response'
+         '403':
+           $ref: '#/components/responses/403Response'
+         '404':
+           $ref: '#/components/responses/404Response'        
+         '500':
+           $ref: '#/components/responses/500Response'
+components:
+  parameters:
+    title:
+      name: title
+      in: query
+      description: Title of the book
+      required: false
+      example: "bnp paribas fortis boek"
+      schema: 
+        $ref: '#/components/schemas/Title'
+    category:
+      name: category
+      in: query
+      description: Category of the book
+      required: false
+      example: "Novel"
+      schema: 
+        $ref: '#/components/schemas/Category'
+    price:
+      name: price
+      in: query
+      description: Price of the book
+      required: false
+      example: 3.14
+      schema: 
+        $ref: '#/components/schemas/Price'
+    author:
+      name: author
+      in: query
+      description: Author of the book
+      required: false
+      example: "Sam Rotthier"
+      schema: 
+        $ref: '#/components/schemas/Author'
+    isbnCode:
+      name: isbnCode
+      in: path
+      description: ISBN code of the book
+      required: true
+      example: "978-90-1234-567-8"
+      schema: 
+        $ref: '#/components/schemas/IsbnCode'
+  responses:
+    BookListRetrievalResponse:
+        description: The list of books is successfully retrieved.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Book'               
+    BookRetrievalResponse:
+        description: The book is successfully retrieved.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+    OrderCreationResponse:
+        description: The order is successfully created.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'                
+    400Response:            
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+    401Response:            
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+    403Response:            
+        description: Forbidden
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+    404Response:            
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+    500Response:            
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+  schemas:
+    Order:
+      type: object
+      properties:
+        orderId:
+          $ref: '#/components/schemas/OrderId' 
+        userId:
+          $ref: '#/components/schemas/UserId'  
+        orderDatetime:
+          $ref: '#/components/schemas/OrderDatetime' 
+        totalPrice:
+          $ref: '#/components/schemas/TotalPrice' 
+        orderItemList:
+          description: The list of all order items in this order
+          type: array
+          items: 
+            $ref: '#/components/schemas/OrderItem'            
+    OrderId:
+      type: integer
+      format: int64
+      example: 10
+    OrderDatetime:
+      type: string
+      format: date-time
+      example: "2017-07-21T17:32:28Z"
+    TotalPrice:
+      type: integer
+      format: float
+      example: 100.1
+    OrderItem:
+      type: object
+      properties:
+       orderItemId:
+         $ref: '#/components/schemas/OrderItemId'  
+       orderId:
+         $ref: '#/components/schemas/OrderId'  
+       bookId:
+         $ref: '#/components/schemas/BookId'  
+       quantity:
+         $ref: '#/components/schemas/Quantity'  
+       price:
+         $ref: '#/components/schemas/Price'  
+    Quantity:
+      type: integer
+      format: int64
+      example: 5
+    OrderItemId:
+      type: integer
+      format: int64
+      example: 198772
+    User:
+      type: object
+      properties:
+        userId:
+          $ref: '#/components/schemas/UserId'  
+        userName:
+          $ref: '#/components/schemas/UserName'  
+        address:
+          $ref: '#/components/schemas/Address'
+    UserId:
+      type: integer
+      format: int64
+      example: 10
+    UserName:
+      type: string
+      example: "Sam Rotthier"
+    Address:
+      type: string
+      example: "Warandeberg 3, 1000 Brussel"       
+    Book:
+      type: object
+      properties:
+       bookId:
+         $ref: "#/components/schemas/BookId"
+       title:
+         $ref: "#/components/schemas/Title"
+       picture:
+         $ref: "#/components/schemas/Picture"
+       price:
+         $ref: "#/components/schemas/Price"
+       summary:
+         $ref: "#/components/schemas/Summary"
+       description:
+         $ref: "#/components/schemas/Description"
+       rating:
+         $ref: "#/components/schemas/Rating"
+       author:
+         $ref: "#/components/schemas/Author"
+       isbnCode:
+         $ref: "#/components/schemas/IsbnCode"
+       category:
+         $ref: "#/components/schemas/Category"
+    BookId:
+      type: integer
+      format: int64
+      example: 41
+    Summary:
+      type: string
+      example: "Bnp Paribas Fortis boek gaat over beleggen."
+    Description:
+      type: string
+      example: "Bnp Paribas Fortis boek gaat over beleggen. Beleggen houd altijd risico..."
+    Rating:
+      type: integer
+      format: int32
+      example: 8
+    IsbnCode:
+      type: string
+      example: "978-90-1234-567-8"
+    Picture:
+      type: string
+      example: "https://www.w3schools.com/images/picture.jpg"
+    Title:
+      type: string
+      example: "Bnp Paribas Fortis boek"
+    Price:
+      type: number
+      format: float
+      example: 3.14
+    Author:
+      type: string
+      example: "Sam Rotthier"  
+    Category:
+      type: string
+      enum:
+        - science fiction
+        - fantasy
+        - horror
+        - historical fiction
+        - mystery
+        - romance
+        - memoir
+        - graphic novel  
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message

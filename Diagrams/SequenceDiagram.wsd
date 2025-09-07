@@ -1,0 +1,46 @@
+@startuml
+Title Sequence Diagram
+
+Customer -> WebshopUI : Open GreatBooks website
+Customer <- WebshopUI : Return homepage
+
+Customer -> WebshopUI : Search for book(s)
+alt Search by Title, Category, Price or Author
+    WebshopUI -> WebshopAPI : getListOfBooks(title, category, price, author)
+    WebshopAPI -> Database : getListOfBooks(title, category, price, author)
+    alt If filters were selected
+        WebshopAPI <- Database : Retrieve fitlered list of books
+        WebshopUI <- WebshopAPI : Retrieve fitlered list of books
+        Customer <- WebshopUI : Retrieve fitlered list of books
+    else If no filters were selected
+        WebshopAPI <- Database : Retrieve list of all books
+        WebshopUI <- WebshopAPI : Retrieve list of all books
+        Customer <- WebshopUI : Retrieve list of all books
+    end
+else Search by ISBN code
+    WebshopUI -> WebshopAPI : getBookByISBNCode(ISBNCode)
+    WebshopAPI -> Database : getBookByISBNCode(ISBNCode)
+    WebshopAPI <- Database : Retrieve book
+    WebshopUI <- WebshopAPI : Retrieve book
+    Customer <- WebshopUI : Retrieve book
+else 400 or 500 error codes
+    WebshopAPI <- Database : Send error message
+    WebshopUI <- WebshopAPI : Send error message
+    Customer <- WebshopUI : Send error message
+end
+
+Customer -> WebshopUI : Order book(s)
+WebshopUI -> WebshopAPI : createOrder(OrderId, UserId, OrderDatetime, TotalPrice, OrderItems)
+WebshopAPI -> Database : createOrder(OrderId, UserId, OrderDatetime, TotalPrice, OrderItems)
+alt Succesful order
+    WebshopAPI <- Database : Send confirmation message
+    WebshopUI <- WebshopAPI : Send confirmation message
+    Customer <- WebshopUI : Send confirmation message
+else Failed order
+    WebshopAPI <- Database : Send error message
+    loop 5 times - retry mechanism
+        WebshopAPI -> Database : createOrder(OrderId, UserId, OrderDatetime, TotalPrice, OrderItems)
+    end
+    WebshopUI <- WebshopAPI : Send error message
+    Customer <- WebshopUI : Send error message
+end
